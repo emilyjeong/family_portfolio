@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0a0a09">
+  <title>부부 포트폴리오</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body>
+
+  <!-- ─── 탭 헤더 ──────────────────────────────────────────── -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="couple">부부 합산 💑</button>
+    <button class="tab-btn" data-tab="wife">아내 포트폴리오 👰</button>
+    <button class="tab-btn" data-tab="husband">남편 포트폴리오 🤵</button>
+  </nav>
+
+  <!-- ─── 로딩 / 에러 ──────────────────────────────────────── -->
+  <div id="globalLoader" class="loader">데이터 불러오는 중…</div>
+  <div id="globalError" class="error-banner hidden"></div>
+
+  <!-- ─── 부부 합산 탭 ─────────────────────────────────────── -->
+  <section class="tab-panel active" id="tab-couple">
+    <h1 class="page-title couple-color">부부 합산 자산 💕🌹</h1>
+
+    <div class="card">
+      <div class="card-label">합산 총 평가금액</div>
+      <div class="card-value couple-color" id="coupleTotalValue">—</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">합산 평가손익</div>
+      <div class="card-value" id="coupleTotalPnl">—</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">기준일</div>
+      <div class="card-value-sm" id="coupleAsOf">—</div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">자산 비중</h2>
+      <div class="chart-wrap chart-wrap--donut">
+        <canvas id="coupleSectorChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">자산 추이</h2>
+      <div class="section-sub">부부 합산 월별 평가금액 (Unit: 만원)</div>
+      <div class="chart-wrap">
+        <canvas id="coupleAssetChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">월별 수익률 추이</h2>
+      <div class="section-sub">각자 평가손익률 변화</div>
+      <div class="chart-wrap">
+        <canvas id="coupleReturnChart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 아내 탭 ─────────────────────────────────────────── -->
+  <section class="tab-panel" id="tab-wife">
+    <h1 class="page-title wife-color">아내 포트폴리오</h1>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-label">총 평가금액</div>
+        <div class="card-value-md wife-color" id="wifeTotalValue">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">총 투입금액</div>
+        <div class="card-value-md text-secondary" id="wifeTotalCost">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">평가손익</div>
+        <div class="card-value-md" id="wifeTotalPnl">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">수익률</div>
+        <div class="card-value-md warning-color" id="wifeReturn">—</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">자산 비중</h2>
+      <div class="chart-wrap chart-wrap--donut">
+        <canvas id="wifeSectorChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">투입금 vs 평가금</h2>
+      <div class="chart-wrap">
+        <canvas id="wifeCostVsValueChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-row">
+        <h2 class="section-title">보유 종목</h2>
+        <button class="btn-primary wife-bg" data-action="add" data-who="wife">+ 종목 추가</button>
+      </div>
+      <div class="section-sub" id="wifeAsOf">기준일: —</div>
+      <div class="holdings-table" id="wifeHoldings"></div>
+    </div>
+  </section>
+
+  <!-- ─── 남편 탭 ─────────────────────────────────────────── -->
+  <section class="tab-panel" id="tab-husband">
+    <h1 class="page-title husband-color">남편 포트폴리오</h1>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-label">총 평가금액</div>
+        <div class="card-value-md husband-color" id="husbandTotalValue">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">총 투입금액</div>
+        <div class="card-value-md text-secondary" id="husbandTotalCost">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">평가손익</div>
+        <div class="card-value-md" id="husbandTotalPnl">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">수익률</div>
+        <div class="card-value-md warning-color" id="husbandReturn">—</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">자산 비중</h2>
+      <div class="chart-wrap chart-wrap--donut">
+        <canvas id="husbandSectorChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">투입금 vs 평가금</h2>
+      <div class="chart-wrap">
+        <canvas id="husbandCostVsValueChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-row">
+        <h2 class="section-title">보유 종목</h2>
+        <button class="btn-primary husband-bg" data-action="add" data-who="husband">+ 종목 추가</button>
+      </div>
+      <div class="section-sub" id="husbandAsOf">기준일: —</div>
+      <div class="holdings-table" id="husbandHoldings"></div>
+    </div>
+  </section>
+
+  <!-- ─── 모달: 종목 추가/수정 ────────────────────────────── -->
+  <div class="modal hidden" id="editModal">
+    <div class="modal-backdrop" data-close="1"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">종목 추가</h3>
+        <button class="modal-close" data-close="1">✕</button>
+      </div>
+      <form id="editForm" class="modal-body" autocomplete="off">
+        <input type="hidden" id="fld-mode" value="create">
+        <input type="hidden" id="fld-who" value="">
+
+        <label>종목명
+          <input type="text" id="fld-name" required placeholder="예: 삼성전자">
+        </label>
+
+        <label>티커
+          <div class="input-row">
+            <input type="text" id="fld-ticker" required placeholder="6자리 코드 또는 영문심볼">
+            <button type="button" class="btn-secondary" id="btn-findTicker">검색</button>
+          </div>
+        </label>
+
+        <label>시장
+          <select id="fld-market">
+            <option value="KR">KR (국내)</option>
+            <option value="US">US (해외)</option>
+          </select>
+        </label>
+
+        <div class="grid-2-tight">
+          <label>수량
+            <input type="number" id="fld-qty" required min="0" step="1" placeholder="0">
+          </label>
+          <label>평단가 (₩)
+            <input type="number" id="fld-avg" required min="0" step="1" placeholder="0">
+          </label>
+        </div>
+
+        <label>섹터
+          <select id="fld-sector">
+            <option value="반도체">반도체</option>
+            <option value="AI">AI</option>
+            <option value="지수">지수</option>
+            <option value="전력/원자력/에너지">전력/원자력/에너지</option>
+            <option value="자동차/로봇">자동차/로봇</option>
+            <option value="조선">조선</option>
+            <option value="방산/우주">방산/우주</option>
+            <option value="철강">철강</option>
+            <option value="금융">금융</option>
+            <option value="2차전지">2차전지</option>
+            <option value="기술">기술</option>
+            <option value="바이오">바이오</option>
+            <option value="기타" selected>기타</option>
+          </select>
+        </label>
+
+        <label>메모 (선택)
+          <input type="text" id="fld-memo" placeholder="">
+        </label>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-danger hidden" id="btn-delete">삭제</button>
+          <button type="submit" class="btn-primary" id="btn-save">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── JS ──────────────────────────────────────────────── -->
+  <script src="./assets/js/config.js"></script>
+  <script src="./assets/js/api.js"></script>
+  <script src="./assets/js/charts.js"></script>
+  <script src="./assets/js/ui.js"></script>
+  <script src="./assets/js/app.js"></script>
+</body>
+</html>
