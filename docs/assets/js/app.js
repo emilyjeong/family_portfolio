@@ -1,25 +1,21 @@
 /**
  * ═════════════════════════════════════════════════════════════
- * 메인 앱 (app.js)
- *   초기화 + 이벤트 바인딩 + 데이터 로딩
+ * 메인 앱 (app.js) — v2 계좌 컬럼 지원
  * ═════════════════════════════════════════════════════════════
  */
 
 (() => {
 
-  // 마지막 로딩한 포트폴리오·스냅샷 캐시
   const state = {
     portfolio: null,
     snapshots: null,
     activeTab: CONFIG.DEFAULT_TAB
   };
 
-  // ─── 데이터 로딩 ──────────────────────────────────────────
   async function loadAll() {
     UI.showLoader(true);
     UI.showError(null);
     try {
-      // 두 API 병렬 호출
       const [portfolio, snapshots] = await Promise.all([
         API.getPortfolio('both'),
         API.getSnapshots()
@@ -42,7 +38,6 @@
     const snaps = state.snapshots;
     if (!p) return;
 
-    // ── 부부 합산 ────────────────────────────────────────
     UI.renderCouple(p);
     if (p.combined) Charts.donut('coupleSectorChart', p.combined.sectors);
     if (snaps.length) {
@@ -50,14 +45,12 @@
       Charts.returnRateLine('coupleReturnChart', snaps);
     }
 
-    // ── 아내 ────────────────────────────────────────────
     if (p.wife) {
       UI.renderPersonal('wife', p.wife);
       Charts.donut('wifeSectorChart', p.wife.sectors);
       if (snaps.length) Charts.costVsValueLine('wifeCostVsValueChart', snaps, 'wife');
     }
 
-    // ── 남편 ────────────────────────────────────────────
     if (p.husband) {
       UI.renderPersonal('husband', p.husband);
       Charts.donut('husbandSectorChart', p.husband.sectors);
@@ -65,7 +58,6 @@
     }
   }
 
-  // ─── 이벤트 핸들러 ────────────────────────────────────────
   function bindEvents() {
 
     // 탭 전환
@@ -76,7 +68,7 @@
       });
     });
 
-    // 위임된 클릭 (수정/추가 버튼)
+    // 수정/추가 버튼 위임
     document.addEventListener('click', (e) => {
       const target = e.target.closest('[data-action]');
       if (!target) return;
@@ -88,12 +80,13 @@
       }
       if (action === 'edit') {
         const name = decodeURIComponent(target.dataset.name);
-        const holding = findHolding(who, name);
+        const account = decodeURIComponent(target.dataset.account || '');
+        const holding = findHolding(who, name, account);
         if (holding) UI.openModal('edit', who, holding);
       }
     });
 
-    // 모달 닫기 (배경/X)
+    // 모달 닫기
     document.addEventListener('click', (e) => {
       if (e.target.dataset.close === '1') UI.closeModal();
     });
@@ -113,7 +106,7 @@
       } catch (err) { UI.showError(err.message); }
     });
 
-    // 폼 제출 (저장)
+    // 폼 제출
     document.getElementById('editForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const { mode, who, payload } = UI.getModalPayload();
@@ -130,13 +123,14 @@
         } else {
           await API.updateHolding(who, {
             name: payload.name,
+            account: payload.account,
             qty: payload.qty,
             avg: payload.avg,
             memo: payload.memo
           });
         }
         UI.closeModal();
-        await loadAll();      // 시트 → JSON → 화면 갱신
+        await loadAll();
       } catch (err) {
         UI.showError(err.message);
         UI.showLoader(false);
@@ -146,11 +140,11 @@
     // 삭제 버튼
     document.getElementById('btn-delete').addEventListener('click', async () => {
       const { who, payload } = UI.getModalPayload();
-      if (!confirm(`정말 "${payload.name}" 종목을 삭제하시겠습니까?\n(시트에는 기록이 남고, HTML에서만 사라집니다)`)) return;
+      if (!confirm(`정말 "${payload.name}" (${payload.account}) 종목을 삭제하시겠습니까?\n(시트에는 기록이 남고, HTML에서만 사라집니다)`)) return;
 
       UI.showLoader(true);
       try {
-        await API.deleteHolding(who, payload.name);
+        await API.deleteHolding(who, payload.name, payload.account);
         UI.closeModal();
         await loadAll();
       } catch (err) {
@@ -160,14 +154,13 @@
     });
   }
 
-  // ─── 헬퍼 ─────────────────────────────────────────────────
-  function findHolding(who, name) {
+  function findHolding(who, name, account) {
     if (!state.portfolio) return null;
     const list = (state.portfolio[who] && state.portfolio[who].holdings) || [];
-    return list.find(h => h.name === name) || null;
+    const targetAccount = account || '일반';
+    return list.find(h => h.name === name && (h.account || '일반') === targetAccount) || null;
   }
 
-  // ─── 초기화 ───────────────────────────────────────────────
   function init() {
     if (!CONFIG.GAS_URL || CONFIG.GAS_URL.includes('PASTE_YOUR_DEPLOYMENT_ID')) {
       UI.showError('config.js의 GAS_URL을 본인 웹앱 URL로 교체하세요');
@@ -184,7 +177,6 @@
     }
   }
 
-  // DOM 준비되면 시작
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
