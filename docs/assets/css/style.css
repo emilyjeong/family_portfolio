@@ -1,40 +1,44 @@
 /* ═══════════════════════════════════════════════════════════════
    인생 자동화 — 부부 포트폴리오 대시보드
-   다크 테마 (사용자 자동화 시리즈 톤 통일: #0a0a09 / ink #e8e4dc)
+   다크 테마 (사용자 자동화 시리즈 톤: #0a0a09 / ink #e8e4dc)
    ═══════════════════════════════════════════════════════════════ */
-:root{--text-primary:#e8e4dc;--text-secondary:#9a9489;--text-muted:#5a554d;--bg-card:#131312;--bg-elevated:#232220;}
 
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
 
-/* ─── CSS 변수 ──────────────────────────────────────────────── */
+/* ─── CSS 변수 (charts.js와 완전 통일) ──────────────────────── */
 :root {
-  /* 배경 (사용자 자동화 표준) */
-  --bg:           #0a0a09;
-  --surface:      #131312;
-  --surface-2:    #1a1a18;
-  --surface-3:    #232220;
-  --border:       #2a2a27;
-  --border-faint: #1e1e1c;
-  --border-strong:#3a3a36;
+  /* 배경 */
+  --bg:             #0a0a09;
+  --surface:        #131312;
+  --surface-2:      #1a1a18;
+  --surface-3:      #232220;
+  --border:         #2a2a27;
+  --border-faint:   #1e1e1c;
+  --border-strong:  #3a3a36;
 
-  /* 텍스트 */
-  --ink:          #e8e4dc;
-  --ink-mid:      #9a9489;
-  --ink-dim:      #5a554d;
+  /* 텍스트 (charts.js가 참조하는 이름까지 다 포함) */
+  --ink:            #e8e4dc;
+  --ink-mid:        #9a9489;
+  --ink-dim:        #5a554d;
+  --text-primary:   #e8e4dc;
+  --text-secondary: #9a9489;
+  --text-muted:     #5a554d;
+  --bg-card:        #131312;
+  --bg-elevated:    #232220;
 
-  /* 강조 (시리즈 톤) */
-  --blue:         #4e9fe0;
-  --green:        #4ec994;
-  --yellow:       #d4a843;
-  --orange:       #d4784a;
-  --red:          #d4574e;
+  /* 강조 색 */
+  --blue:           #4e9fe0;
+  --green:          #4ec994;
+  --yellow:         #d4a843;
+  --orange:         #d4784a;
+  --red:            #d4574e;
 
   /* 탭별 시그니처 */
-  --c-couple:     #4e9fe0;   /* 부부합산 */
-  --c-wife:       #4ec994;   /* 아내 */
-  --c-husband:    #d4784a;   /* 남편 */
+  --c-couple:       #4e9fe0;
+  --c-wife:         #4ec994;
+  --c-husband:      #d4784a;
 
-  /* 차트 팔레트 12색 (시리즈 톤) */
+  /* 차트 팔레트 (12색) */
   --chart-1:  #4e9fe0;
   --chart-2:  #4ec994;
   --chart-3:  #d4a843;
@@ -52,7 +56,7 @@
   --mono:  'DM Mono', ui-monospace, monospace;
 }
 
-/* ─── iOS Files 등에서 다크모드 강제 적용 ───────────────────── */
+/* ─── 다크모드 강제 적용 (iOS Files 등) ──────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
@@ -116,7 +120,7 @@ input, select, button { font-size: 15px; }
   letter-spacing: -0.2px;
 }
 
-/* ─── 탭바 ──────────────────────────────────────────────────── */
+/* ─── 탭바 ──────────────────────────────────────────────── */
 .tab-bar {
   display: flex;
   gap: 4px;
@@ -146,7 +150,7 @@ input, select, button { font-size: 15px; }
 .tab-btn.active[data-tab="wife"]    { color: var(--c-wife);    border-bottom-color: var(--c-wife);    }
 .tab-btn.active[data-tab="husband"] { color: var(--c-husband); border-bottom-color: var(--c-husband); }
 
-/* ─── 탭 패널 ──────────────────────────────────────────────── */
+/* ─── 탭 패널 ──────────────────────────────────────────── */
 .tab-panel { display: none; }
 .tab-panel.active { display: block; animation: fadeIn .25s ease; }
 
@@ -155,7 +159,7 @@ input, select, button { font-size: 15px; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── 카드 ─────────────────────────────────────────────────── */
+/* ─── 카드 ─────────────────────────────────────────────── */
 .card {
   background-color: #131312;
   border: 1px solid var(--border);
@@ -175,10 +179,11 @@ input, select, button { font-size: 15px; }
 
 .section-title {
   font-family: var(--serif);
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   margin-bottom: 4px;
-  color: var(--ink);
+  color: #ffffff !important;
+  letter-spacing: -0.2px;
 }
 
 .section-sub {
@@ -197,7 +202,7 @@ input, select, button { font-size: 15px; }
 
 .card-label {
   font-size: 12px;
-  color: var(--ink-mid);
+  color: #b8b2a6 !important;
   margin-bottom: 8px;
   font-weight: 400;
   letter-spacing: 0.3px;
@@ -219,7 +224,7 @@ input, select, button { font-size: 15px; }
   font-weight: 400;
 }
 
-/* ─── 컬러 유틸 ────────────────────────────────────────────── */
+/* ─── 컬러 유틸 ────────────────────────────────────────── */
 .couple-color   { color: #4e9fe0 !important; }
 .wife-color     { color: #4ec994 !important; }
 .husband-color  { color: #d4784a !important; }
@@ -232,7 +237,7 @@ input, select, button { font-size: 15px; }
 .wife-bg    { background-color: #0f2a1e !important; color: #4ec994 !important; border: 1px solid #4ec994 !important; }
 .husband-bg { background-color: #2a1810 !important; color: #d4784a !important; border: 1px solid #d4784a !important; }
 
-/* ─── 그리드 ───────────────────────────────────────────────── */
+/* ─── 그리드 ───────────────────────────────────────────── */
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -247,7 +252,7 @@ input, select, button { font-size: 15px; }
   gap: 10px;
 }
 
-/* ─── 차트 ─────────────────────────────────────────────────── */
+/* ─── 차트 ─────────────────────────────────────────────── */
 .chart-wrap {
   position: relative;
   width: 100%;
@@ -256,7 +261,23 @@ input, select, button { font-size: 15px; }
 }
 .chart-wrap--donut { height: 320px; }
 
-/* ─── 보유 종목 테이블 ─────────────────────────────────────── */
+.empty-chart-msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-dim);
+  text-align: center;
+  font-size: 13px;
+  font-family: var(--serif);
+  padding: 20px;
+  white-space: pre-line;
+  line-height: 1.7;
+  pointer-events: none;
+}
+
+/* ─── 보유 종목 테이블 ─────────────────────────────────── */
 .holdings-table { margin-top: 10px; display: flex; flex-direction: column; }
 
 .holdings-row {
@@ -333,7 +354,7 @@ input, select, button { font-size: 15px; }
   line-height: 1.8;
 }
 
-/* ─── 버튼 ─────────────────────────────────────────────────── */
+/* ─── 버튼 ─────────────────────────────────────────────── */
 .btn-primary {
   background-color: #1a2d3d;
   color: #4e9fe0;
@@ -368,7 +389,7 @@ input, select, button { font-size: 15px; }
   font-family: var(--serif);
 }
 
-/* ─── 모달 ─────────────────────────────────────────────────── */
+/* ─── 모달 ─────────────────────────────────────────────── */
 .modal {
   position: fixed;
   inset: 0;
@@ -476,7 +497,7 @@ input, select, button { font-size: 15px; }
 }
 .modal-footer .btn-primary { flex: 1; padding: 13px; font-size: 15px; }
 
-/* ─── 로더 / 에러 ──────────────────────────────────────────── */
+/* ─── 로더 / 에러 ──────────────────────────────────────── */
 .loader {
   text-align: center;
   padding: 40px 0;
