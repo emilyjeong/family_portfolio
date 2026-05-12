@@ -2,29 +2,38 @@
  * ═════════════════════════════════════════════════════════════
  * Chart.js 래퍼 (charts.js)
  *   다크 테마 + 한국어 친화적 차트 생성
- *   (색은 CSS 변수 의존 없이 직접 박혀있음 - 가장 확실)
+ *   디자인 시스템 토큰(섹션 10) 기준 — CSS와 1:1 일치
  * ═════════════════════════════════════════════════════════════
  */
 
 const Charts = (() => {
 
-  // ─── 색상 팔레트 (CSS 변수 안 쓰고 직접 박음) ─────────────
+  // ─── 색상 (디자인 시스템 토큰값을 직접 박음) ─────────────
   const COLORS = {
-    inkPrimary:   '#e8e4dc',
-    inkMid:       '#9a9489',
-    inkDim:       '#5a554d',
-    border:       '#2a2a27',
-    borderStrong: '#3a3a36',
-    bgCard:       '#131312',
-    bgElevated:   '#232220',
+    // 텍스트/배경/보더
+    inkPrimary:   '#f0ede8',   // --ink
+    inkMid:       '#9a9690',   // --ink-mid
+    inkDim:       '#565250',   // --ink-dim
+    border:       '#2a2926',   // --border
+    borderStrong: '#353330',   // --border-mid
+    bgCard:       '#161513',   // --card
+    bgElevated:   '#1c1b19',   // --card-hi
 
-    couple:       '#4e9fe0',
-    wife:         '#4ec994',
-    husband:      '#d4784a',
+    // 의미색
+    pos:          '#00c98a',   // --pos (수익)
+    neg:          '#f04d62',   // --neg (손실)
+    accent:       '#e8b800',   // --accent (강조)
+    info:         '#5aabf0',   // --info
+    purple:       '#b8a8f0',   // --purple
 
+    // 탭 시그니처 — 차트 라인 컬러
+    wife:         '#b8a8f0',   // 아내 → 퍼플
+    husband:      '#5aabf0',   // 남편 → 인포 블루
+
+    // 도넛 차트 팔레트 (12색)
     palette: [
-      '#4e9fe0', '#4ec994', '#d4a843', '#d4784a',
-      '#b58cd4', '#6dc7c9', '#d4574e', '#9a9489',
+      '#5aabf0', '#00c98a', '#e8b800', '#f07a40',
+      '#b8a8f0', '#6dc7c9', '#f04d62', '#9a9690',
       '#c4a374', '#7eb86b', '#d49ab3', '#5b87ad'
     ]
   };
@@ -91,7 +100,7 @@ const Charts = (() => {
             position: 'right',
             labels: {
               color: COLORS.inkPrimary,
-              font: { size: 12, family: 'Noto Serif KR' },
+              font: { size: 12, family: 'Pretendard' },
               padding: 10,
               generateLabels: (chart) => {
                 const ds = chart.data.datasets[0];
@@ -135,9 +144,9 @@ const Charts = (() => {
         labels: snapshots.map(s => s.date.slice(0, 7)),
         datasets: [
           areaDataset('🤵 남편', snapshots.map(s => Math.round(s.husbandValue / 10000)),
-                      COLORS.husband, '#d4784a55'),
+                      COLORS.husband, '#5aabf055'),
           areaDataset('👰 아내', snapshots.map(s => Math.round(s.wifeValue / 10000)),
-                      COLORS.wife, '#4ec99455')
+                      COLORS.wife, '#b8a8f055')
         ]
       },
       options: lineOptions({
@@ -174,6 +183,8 @@ const Charts = (() => {
   }
 
   // ─── 라인: 개인 투입금 vs 평가금 ───────────────────────────
+  //   평가금 = --accent (디자인 시스템 강조 컬러, 노란색)으로 통일
+  //   투입금 = --ink-dim (회색, 점선) — 원본 그대로
   function costVsValueLine(canvasId, snapshots, who) {
     if (!snapshots.length) {
       showEmpty(canvasId, '월말 스냅샷이 아직 없어요.\nApps Script의 takeSnapshotNow() 실행하면 점이 추가돼요.');
@@ -181,7 +192,7 @@ const Charts = (() => {
     }
     const valueKey = who === 'wife' ? 'wifeValue' : 'husbandValue';
     const costKey  = who === 'wife' ? 'wifeCost'  : 'husbandCost';
-    const color    = who === 'wife' ? COLORS.wife : COLORS.husband;
+    const valueColor = COLORS.accent;   // 평가금은 아내/남편 무관하게 강조 컬러
 
     return makeChart(canvasId, {
       type: 'line',
@@ -191,13 +202,13 @@ const Charts = (() => {
           {
             label: '현재 평가금',
             data: snapshots.map(s => Math.round(s[valueKey] / 10000)),
-            borderColor: color,
-            backgroundColor: color + '33',
+            borderColor: valueColor,
+            backgroundColor: valueColor + '33',
             borderWidth: 2.5,
             fill: true,
             tension: 0.35,
             pointRadius: 3,
-            pointBackgroundColor: color
+            pointBackgroundColor: valueColor
           },
           {
             label: '투입금 (실제 투입금)',
@@ -256,7 +267,7 @@ const Charts = (() => {
           position: 'top',
           labels: {
             color: COLORS.inkPrimary,
-            font: { size: 12, family: 'Noto Serif KR' },
+            font: { size: 12, family: 'Pretendard' },
             usePointStyle: true,
             padding: 12
           }
@@ -290,8 +301,8 @@ const Charts = (() => {
       borderWidth: 1,
       padding: 10,
       cornerRadius: 8,
-      titleFont: { size: 12, family: 'Noto Serif KR', weight: '600' },
-      bodyFont: { size: 12, family: 'Noto Serif KR' },
+      titleFont: { size: 12, family: 'Pretendard', weight: '600' },
+      bodyFont: { size: 12, family: 'Pretendard' },
       callbacks: label ? { label } : undefined
     };
   }
