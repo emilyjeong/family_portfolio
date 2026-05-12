@@ -2,6 +2,7 @@
    인생 자동화 — 부부 포트폴리오 대시보드
    다크 테마 (사용자 자동화 시리즈 톤 통일: #0a0a09 / ink #e8e4dc)
    ═══════════════════════════════════════════════════════════════ */
+:root{--text-primary:#e8e4dc;--text-secondary:#9a9489;--text-muted:#5a554d;--bg-card:#131312;--bg-elevated:#232220;}
 
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
 
