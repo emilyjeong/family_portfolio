@@ -17,7 +17,7 @@ const UI = (() => {
     return d.toISOString().slice(0, 10);
   };
 
-  /** 손익 색상 (양수=초록, 음수=빨강, 0=중립) */
+  /** 손익 색상 (양수=초록 success, 음수=빨강 danger, 0=중립 회색) */
   function pnlClass(n) {
     if (n > 0) return 'success-color';
     if (n < 0) return 'danger-color';
@@ -53,12 +53,15 @@ const UI = (() => {
     setText(`${prefix}TotalValue`, fmtKRW(data.totalValue));
     setText(`${prefix}TotalCost`,  fmtKRW(data.totalCost));
 
+    // 평가손익 — 값 기반으로 색 클래스 동적 설정
     const pnlEl = document.getElementById(`${prefix}TotalPnl`);
     pnlEl.textContent = pnlText(data.totalPnl);
     pnlEl.className = 'card-value-md ' + pnlClass(data.totalPnl);
 
+    // 수익률 — 평가손익과 동일하게 +/- 동적 컬러
     const retEl = document.getElementById(`${prefix}Return`);
     retEl.textContent = pctText(data.returnRate);
+    retEl.className = 'card-value-md ' + pnlClass(data.returnRate);
 
     setText(`${prefix}AsOf`, `기준일: ${fmtDate(new Date().toISOString())}`);
     renderHoldingsTable(`${prefix}Holdings`, who, data.holdings);
