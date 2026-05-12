@@ -16,7 +16,7 @@
 
 const CONFIG = {
   // ⬇️⬇️⬇️ 여기에 본인 GAS Web App URL 붙여넣기 ⬇️⬇️⬇️
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbxczizIhTyhU9cuBYPMsDVY2lkttaKCWNl_kIOMwu53AvHmh5q5Mpa55Id6Oabj8WcCNw/exec',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbylMsbFICN_KFh5POESYLSwGK4MmjATuCkc96V98_wDF9WSFXM4906lHo8XHqWxZ2kRIg/exec',
 
   // ─── 동작 옵션 ──────────────────────────────────────────────
   DEFAULT_TAB: 'couple',           // 첫 로딩 시 활성 탭: couple|wife|husband
