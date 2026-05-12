@@ -2,44 +2,72 @@
  * ═════════════════════════════════════════════════════════════
  * Chart.js 래퍼 (charts.js)
  *   다크 테마 + 한국어 친화적 차트 생성
+ *   (색은 CSS 변수 의존 없이 직접 박혀있음 - 가장 확실)
  * ═════════════════════════════════════════════════════════════
  */
 
 const Charts = (() => {
 
+  // ─── 색상 팔레트 (CSS 변수 안 쓰고 직접 박음) ─────────────
+  const COLORS = {
+    inkPrimary:   '#e8e4dc',
+    inkMid:       '#9a9489',
+    inkDim:       '#5a554d',
+    border:       '#2a2a27',
+    borderStrong: '#3a3a36',
+    bgCard:       '#131312',
+    bgElevated:   '#232220',
+
+    couple:       '#4e9fe0',
+    wife:         '#4ec994',
+    husband:      '#d4784a',
+
+    palette: [
+      '#4e9fe0', '#4ec994', '#d4a843', '#d4784a',
+      '#b58cd4', '#6dc7c9', '#d4574e', '#9a9489',
+      '#c4a374', '#7eb86b', '#d49ab3', '#5b87ad'
+    ]
+  };
+
   // 인스턴스 캐시 (canvas id → Chart 객체)
   const instances = {};
-
-  // CSS 변수에서 색상 읽기
-  const cssVar = (name) => getComputedStyle(document.documentElement)
-    .getPropertyValue(name).trim() || '#e8e4dc';
-
-  // 도넛 팔레트
-  const palette = () => [
-    cssVar('--chart-1'),  cssVar('--chart-2'),  cssVar('--chart-3'),
-    cssVar('--chart-4'),  cssVar('--chart-5'),  cssVar('--chart-6'),
-    cssVar('--chart-7'),  cssVar('--chart-8'),  cssVar('--chart-9'),
-    cssVar('--chart-10'), cssVar('--chart-11'), cssVar('--chart-12')
-  ];
 
   /** 기존 차트 파괴 후 새로 생성 */
   function makeChart(canvasId, config) {
     const ctx = document.getElementById(canvasId);
     if (!ctx) return null;
     if (instances[canvasId]) instances[canvasId].destroy();
+    // empty 메시지 제거
+    const parent = ctx.parentElement;
+    const oldMsg = parent && parent.querySelector('.empty-chart-msg');
+    if (oldMsg) oldMsg.remove();
     instances[canvasId] = new Chart(ctx, config);
     return instances[canvasId];
+  }
+
+  /** 빈 차트 영역에 안내 메시지 표시 */
+  function showEmpty(canvasId, message) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    const parent = ctx.parentElement;
+    if (!parent) return;
+    if (instances[canvasId]) {
+      instances[canvasId].destroy();
+      delete instances[canvasId];
+    }
+    const oldMsg = parent.querySelector('.empty-chart-msg');
+    if (oldMsg) oldMsg.remove();
+    const msg = document.createElement('div');
+    msg.className = 'empty-chart-msg';
+    msg.textContent = message;
+    parent.appendChild(msg);
   }
 
   // ─── 도넛 (섹터 비중) ─────────────────────────────────────
   function donut(canvasId, sectors) {
     const data = (sectors || []).filter(s => s.value > 0);
     if (!data.length) {
-      const ctx = document.getElementById(canvasId);
-      if (ctx) {
-        const parent = ctx.parentElement;
-        parent.innerHTML = '<div class="empty-state">데이터 없음</div>';
-      }
+      showEmpty(canvasId, '데이터가 없어요');
       return;
     }
     return makeChart(canvasId, {
@@ -48,8 +76,8 @@ const Charts = (() => {
         labels: data.map(s => s.name),
         datasets: [{
           data: data.map(s => s.value),
-          backgroundColor: palette(),
-          borderColor: cssVar('--bg-card'),
+          backgroundColor: COLORS.palette,
+          borderColor: COLORS.bgCard,
           borderWidth: 2,
           hoverOffset: 8
         }]
@@ -62,7 +90,7 @@ const Charts = (() => {
           legend: {
             position: 'right',
             labels: {
-              color: cssVar('--text-primary'),
+              color: COLORS.inkPrimary,
               font: { size: 12, family: 'Noto Serif KR' },
               padding: 10,
               generateLabels: (chart) => {
@@ -75,6 +103,7 @@ const Charts = (() => {
                     text: `${label}  ${pct}%`,
                     fillStyle: ds.backgroundColor[i],
                     strokeStyle: ds.backgroundColor[i],
+                    fontColor: COLORS.inkPrimary,
                     index: i
                   };
                 });
@@ -96,20 +125,22 @@ const Charts = (() => {
 
   // ─── 라인: 부부 합산 자산 추이 (영역 누적) ──────────────────
   function coupleAssetLine(canvasId, snapshots) {
-    if (!snapshots.length) return;
+    if (!snapshots.length) {
+      showEmpty(canvasId, '월말 스냅샷이 아직 없어요.\nApps Script의 takeSnapshotNow() 실행하면 점이 추가돼요.');
+      return;
+    }
     return makeChart(canvasId, {
       type: 'line',
       data: {
         labels: snapshots.map(s => s.date.slice(0, 7)),
         datasets: [
           areaDataset('🤵 남편', snapshots.map(s => Math.round(s.husbandValue / 10000)),
-                      cssVar('--c-husband'), '#F472B655'),
+                      COLORS.husband, '#d4784a55'),
           areaDataset('👰 아내', snapshots.map(s => Math.round(s.wifeValue / 10000)),
-                      cssVar('--c-wife'), '#34D39955')
+                      COLORS.wife, '#4ec99455')
         ]
       },
       options: lineOptions({
-        yLabel: '만원',
         tooltipLabel: (ctx) => `${ctx.dataset.label}: ${fmt(ctx.parsed.y * 10000)}`
       })
     });
@@ -117,7 +148,10 @@ const Charts = (() => {
 
   // ─── 라인: 월별 수익률 추이 ───────────────────────────────
   function returnRateLine(canvasId, snapshots) {
-    if (!snapshots.length) return;
+    if (!snapshots.length) {
+      showEmpty(canvasId, '월말 스냅샷이 아직 없어요.\nApps Script의 takeSnapshotNow() 실행하면 점이 추가돼요.');
+      return;
+    }
     const wifeRet = snapshots.map(s =>
       s.wifeCost > 0 ? ((s.wifeValue - s.wifeCost) / s.wifeCost * 100) : 0);
     const husbandRet = snapshots.map(s =>
@@ -128,12 +162,11 @@ const Charts = (() => {
       data: {
         labels: snapshots.map(s => s.date.slice(0, 7)),
         datasets: [
-          lineDataset('👰 아내 수익률(%)', wifeRet, cssVar('--c-wife')),
-          lineDataset('🤵 남편 수익률(%)', husbandRet, cssVar('--c-husband'))
+          lineDataset('👰 아내 수익률(%)', wifeRet, COLORS.wife),
+          lineDataset('🤵 남편 수익률(%)', husbandRet, COLORS.husband)
         ]
       },
       options: lineOptions({
-        yLabel: '%',
         yFormat: (v) => v + '%',
         tooltipLabel: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}%`
       })
@@ -142,10 +175,13 @@ const Charts = (() => {
 
   // ─── 라인: 개인 투입금 vs 평가금 ───────────────────────────
   function costVsValueLine(canvasId, snapshots, who) {
-    if (!snapshots.length) return;
+    if (!snapshots.length) {
+      showEmpty(canvasId, '월말 스냅샷이 아직 없어요.\nApps Script의 takeSnapshotNow() 실행하면 점이 추가돼요.');
+      return;
+    }
     const valueKey = who === 'wife' ? 'wifeValue' : 'husbandValue';
     const costKey  = who === 'wife' ? 'wifeCost'  : 'husbandCost';
-    const color    = who === 'wife' ? cssVar('--c-wife') : cssVar('--c-husband');
+    const color    = who === 'wife' ? COLORS.wife : COLORS.husband;
 
     return makeChart(canvasId, {
       type: 'line',
@@ -166,18 +202,17 @@ const Charts = (() => {
           {
             label: '투입금 (실제 투입금)',
             data: snapshots.map(s => Math.round(s[costKey] / 10000)),
-            borderColor: cssVar('--text-muted'),
+            borderColor: COLORS.inkDim,
             backgroundColor: 'transparent',
             borderDash: [5, 4],
             borderWidth: 1.5,
             tension: 0.35,
             pointRadius: 2,
-            pointBackgroundColor: cssVar('--text-muted')
+            pointBackgroundColor: COLORS.inkDim
           }
         ]
       },
       options: lineOptions({
-        yLabel: '만원',
         tooltipLabel: (ctx) => `${ctx.dataset.label}: ${fmt(ctx.parsed.y * 10000)}`
       })
     });
@@ -211,7 +246,7 @@ const Charts = (() => {
   }
 
   // ─── 헬퍼: 공통 라인 옵션 ─────────────────────────────────
-  function lineOptions({ yLabel, yFormat, tooltipLabel }) {
+  function lineOptions({ yFormat, tooltipLabel }) {
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -220,7 +255,7 @@ const Charts = (() => {
         legend: {
           position: 'top',
           labels: {
-            color: cssVar('--text-primary'),
+            color: COLORS.inkPrimary,
             font: { size: 12, family: 'Noto Serif KR' },
             usePointStyle: true,
             padding: 12
@@ -230,22 +265,16 @@ const Charts = (() => {
       },
       scales: {
         x: {
-          ticks: { color: cssVar('--text-secondary'), font: { size: 10 } },
-          grid: { color: cssVar('--border'), drawBorder: false }
+          ticks: { color: COLORS.inkMid, font: { size: 10 } },
+          grid: { color: COLORS.border, drawBorder: false }
         },
         y: {
           ticks: {
-            color: cssVar('--text-secondary'),
+            color: COLORS.inkMid,
             font: { size: 10 },
             callback: yFormat || ((v) => v.toLocaleString())
           },
-          grid: { color: cssVar('--border'), drawBorder: false },
-          title: yLabel ? {
-            display: true,
-            text: yLabel,
-            color: cssVar('--text-muted'),
-            font: { size: 10 }
-          } : undefined
+          grid: { color: COLORS.border, drawBorder: false }
         }
       }
     };
@@ -254,10 +283,10 @@ const Charts = (() => {
   // ─── 헬퍼: 툴팁 스타일 ────────────────────────────────────
   function tooltipStyle({ label }) {
     return {
-      backgroundColor: cssVar('--bg-elevated'),
-      titleColor: cssVar('--text-primary'),
-      bodyColor: cssVar('--text-primary'),
-      borderColor: cssVar('--border-strong'),
+      backgroundColor: COLORS.bgElevated,
+      titleColor: COLORS.inkPrimary,
+      bodyColor: COLORS.inkPrimary,
+      borderColor: COLORS.borderStrong,
       borderWidth: 1,
       padding: 10,
       cornerRadius: 8,
@@ -267,9 +296,8 @@ const Charts = (() => {
     };
   }
 
-  // 외부에서도 사용할 포맷터
   function fmt(n) {
-    return CONFIG.CURRENCY + Math.round(n).toLocaleString(CONFIG.LOCALE);
+    return '₩' + Math.round(n).toLocaleString('ko-KR');
   }
 
   return { donut, coupleAssetLine, returnRateLine, costVsValueLine };
