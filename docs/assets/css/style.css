@@ -535,4 +535,4 @@ input, select, button { font-size: 15px; }
 }
 .error-banner.hidden { display: none; }
 
-.h
+.hidden { display: none !important; }
