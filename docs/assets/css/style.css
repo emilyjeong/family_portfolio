@@ -39,10 +39,12 @@
   --cat-btc:     #f07a40;
   --cat-retire:  #b8a8f0;
 
-  /* 탭별 시그니처 (디자인 시스템 색 매핑) */
-  --c-couple:  var(--info);     /* 부부 — 정보/링크 블루 */
-  --c-wife:    var(--pos);      /* 아내 — 수익/상승 그린 */
-  --c-husband: var(--cat-btc);  /* 남편 — BTC 오렌지 */
+  /* 탭별 시그니처 (차트 라인 + 종목추가 버튼 색)
+     ※ 탭/제목/총액 등은 모두 --ink 또는 --accent로 변경됨.
+        이 토큰은 이제 차트 라인 색, .wife-bg/.husband-bg 버튼에만 쓰임. */
+  --c-couple:  var(--info);     /* 미사용 — 유지용 */
+  --c-wife:    var(--purple);   /* 아내 — 퍼플 #b8a8f0 */
+  --c-husband: var(--info);     /* 남편 — 인포 블루 #5aabf0 */
 
   /* 레이아웃 */
   --radius:    14px;
@@ -177,9 +179,12 @@ input, select, button { font-size: 14px; font-family: var(--font-sans); }
 }
 .tab-btn:hover { color: var(--ink-mid); }
 
-.tab-btn.active[data-tab="couple"]  { color: var(--c-couple);  border-bottom-color: var(--c-couple);  }
-.tab-btn.active[data-tab="wife"]    { color: var(--c-wife);    border-bottom-color: var(--c-wife);    }
-.tab-btn.active[data-tab="husband"] { color: var(--c-husband); border-bottom-color: var(--c-husband); }
+/* 활성 탭은 셋 다 --ink (텍스트 컬러) */
+.tab-btn.active {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+  font-weight: 600;
+}
 
 /* ─── 탭 패널 ───────────────────────────────────────── */
 .tab-panel { display: none; }
@@ -281,6 +286,22 @@ input, select, button { font-size: 14px; font-family: var(--font-sans); }
 .success-color  { color: var(--pos)       !important; }
 .danger-color   { color: var(--neg)       !important; }
 .info-color     { color: var(--info)      !important; }
+
+/* ─── 컨텍스트별 오버라이드 ────────────────────────
+   • 페이지 타이틀: 탭 색 무시하고 --ink
+   • 총 평가금액: 탭 색 무시하고 --accent (강조 컬러)
+   HTML은 그대로 두고 CSS만으로 색을 잡는다. */
+.page-title.couple-color,
+.page-title.wife-color,
+.page-title.husband-color {
+  color: var(--ink) !important;
+}
+
+.card-value.couple-color,         /* 부부 합산 총 평가금액 */
+.card-value-md.wife-color,        /* 아내 총 평가금액 */
+.card-value-md.husband-color {    /* 남편 총 평가금액 */
+  color: var(--accent) !important;
+}
 
 /* 톤다운 배경 — 디자인 시스템: 색상 12~15% bg + 45% border */
 .couple-bg {
