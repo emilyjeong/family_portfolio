@@ -7,27 +7,27 @@
   <meta name="theme-color" content="#0a0a09">
   <title>부부 포트폴리오</title>
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
   <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body>
 
-  <!-- ─── 탭 헤더 ──────────────────────────────────────────── -->
   <nav class="tab-bar">
     <button class="tab-btn active" data-tab="couple">부부 합산 👩🏻‍❤️‍👨🏻</button>
     <button class="tab-btn" data-tab="wife">Em 🐰</button>
     <button class="tab-btn" data-tab="husband">Fabio 🦊</button>
   </nav>
 
-  <!-- ─── 로딩 / 에러 ──────────────────────────────────────── -->
   <div id="globalLoader" class="loader">자산 불러오는 중.. <span class="loader-emoji">💰</span></div>
   <div id="globalError" class="error-banner hidden"></div>
 
   <!-- ─── 부부 합산 탭 ─────────────────────────────────────── -->
   <section class="tab-panel active" id="tab-couple">
-    <h1 class="page-title couple-color">부부 합산 자산 👩🏻‍❤️‍👨🏻</h1>
+    <div class="page-title-row">
+      <h1 class="page-title couple-color">부부 합산 자산 👩🏻‍❤️‍👨🏻</h1>
+      <!-- 🏠 홈으로: 본인 홈페이지 URL로 바꿔주세요 -->
+      <a href="https://emilyjeong.github.io/home" class="home-btn" aria-label="홈으로 가기">🏠</a>
+    </div>
 
     <div class="card">
       <div class="card-label">합산 총 평가금액</div>
@@ -52,7 +52,10 @@
     </div>
 
     <div class="card">
-      <h2 class="section-title">자산 추이</h2>
+      <div class="section-row">
+        <h2 class="section-title">자산 추이</h2>
+        <button class="btn-snapshot" data-action="snapshot">📸 지금 찍기</button>
+      </div>
       <div class="section-sub">부부 합산 월별 평가금액 (Unit: 만원)</div>
       <div class="chart-wrap">
         <canvas id="coupleAssetChart"></canvas>
@@ -162,7 +165,7 @@
     </div>
   </section>
 
-  <!-- ─── 모달: 종목 추가/수정 ────────────────────────────── -->
+  <!-- ─── 모달 ────────────────────────────────────────── -->
   <div class="modal hidden" id="editModal">
     <div class="modal-backdrop" data-close="1"></div>
     <div class="modal-content">
@@ -172,8 +175,8 @@
       </div>
       <form id="editForm" class="modal-body" autocomplete="off">
         <div class="modal-tip">
-    💡 <strong>수정</strong> = 덮어쓰기 · <strong>추가</strong> = 새 행<br>
-      매칭 키: <strong>종목명 + 계좌</strong> (같으면 중복 에러)
+          💡 <strong>수정</strong> = 덮어쓰기 · <strong>추가</strong> = 새 행<br>
+          매칭 키: <strong>종목명 + 계좌</strong> (같으면 중복 에러)
         </div>
         <input type="hidden" id="fld-mode" value="create">
         <input type="hidden" id="fld-who" value="">
@@ -239,7 +242,6 @@
     </div>
   </div>
 
-  <!-- ─── JS ──────────────────────────────────────────────── -->
   <script src="./assets/js/config.js"></script>
   <script src="./assets/js/api.js"></script>
   <script src="./assets/js/charts.js"></script>
