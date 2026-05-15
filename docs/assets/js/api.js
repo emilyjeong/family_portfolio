@@ -1,7 +1,6 @@
 /**
  * ═════════════════════════════════════════════════════════════
- * API 래퍼 (api.js) — v2 계좌 컬럼 지원
- *   ⚠️ POST는 CORS preflight 회피 위해 Content-Type: text/plain
+ * API 래퍼 (api.js) — v2 계좌 컬럼 + 스냅샷 지원
  * ═════════════════════════════════════════════════════════════
  */
 
@@ -42,6 +41,7 @@ const API = (() => {
     updateHolding: (who, payload)        => post({ action: 'update', who, payload }),
     createHolding: (who, payload)        => post({ action: 'create', who, payload }),
     deleteHolding: (who, name, account)  => post({ action: 'delete', who, payload: { name, account } }),
-    lookupTicker:  (name)                => post({ action: 'lookup', payload: { name } })
+    lookupTicker:  (name)                => post({ action: 'lookup', payload: { name } }),
+    takeSnapshot:  ()                    => post({ action: 'snapshot' })
   };
 })();
