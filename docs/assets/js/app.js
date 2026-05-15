@@ -1,6 +1,6 @@
 /**
  * ═════════════════════════════════════════════════════════════
- * 메인 앱 (app.js) — v2 계좌 컬럼 지원
+ * 메인 앱 (app.js) — v2 계좌 컬럼 + 스냅샷 버튼 지원
  * ═════════════════════════════════════════════════════════════
  */
 
@@ -68,8 +68,8 @@
       });
     });
 
-    // 수정/추가 버튼 위임
-    document.addEventListener('click', (e) => {
+    // 수정/추가/스냅샷 버튼 위임
+    document.addEventListener('click', async (e) => {
       const target = e.target.closest('[data-action]');
       if (!target) return;
       const action = target.dataset.action;
@@ -83,6 +83,24 @@
         const account = decodeURIComponent(target.dataset.account || '');
         const holding = findHolding(who, name, account);
         if (holding) UI.openModal('edit', who, holding);
+      }
+      if (action === 'snapshot') {
+        const original = target.textContent;
+        target.disabled = true;
+        target.textContent = '📸 찍는 중...';
+        try {
+          await API.takeSnapshot();
+          target.textContent = '✓ 저장됨';
+          await loadAll();
+          setTimeout(() => {
+            target.textContent = original;
+            target.disabled = false;
+          }, 2000);
+        } catch (err) {
+          UI.showError('스냅샷 실패: ' + err.message);
+          target.textContent = original;
+          target.disabled = false;
+        }
       }
     });
 
