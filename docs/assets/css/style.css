@@ -636,3 +636,18 @@ input, select, button { font-size: 14px; font-family: var(--font-sans); }
 .error-banner.hidden { display: none; }
 
 .hidden { display: none !important; }
+
+.modal-tip {
+  background-color: var(--card-hi);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--ink-mid);
+  margin-bottom: 4px;
+}
+.modal-tip strong {
+  color: var(--ink);
+  font-weight: 600;
+}
