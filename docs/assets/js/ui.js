@@ -1,6 +1,6 @@
 /**
  * ═════════════════════════════════════════════════════════════
- * UI 렌더링 (ui.js) — v2 계좌 컬럼 지원
+ * UI 렌더링 (ui.js) — 계좌별 그룹화
  * ═════════════════════════════════════════════════════════════
  */
 
@@ -52,12 +52,13 @@ const UI = (() => {
 
     const retEl = document.getElementById(`${prefix}Return`);
     retEl.textContent = pctText(data.returnRate);
-    retEl.className = 'card-value-md ' + pnlClass(data.returnRate); 
+    retEl.className = 'card-value-md ' + pnlClass(data.returnRate);
 
     setText(`${prefix}AsOf`, `기준일: ${fmtDate(new Date().toISOString())}`);
     renderHoldingsTable(`${prefix}Holdings`, who, data.holdings);
   }
 
+  // ─── 보유 종목 테이블 (계좌별 그룹화) ────────────────────
   function renderHoldingsTable(containerId, who, holdings) {
     const el = document.getElementById(containerId);
     if (!el) return;
@@ -67,7 +68,22 @@ const UI = (() => {
       return;
     }
 
-    const sorted = [...holdings].sort((a, b) => b.returnRate - a.returnRate);
+    // 1) 계좌순 → 2) 종목명순 정렬
+    const sorted = [...holdings].sort((a, b) => {
+      const accountA = a.account || '일반';
+      const accountB = b.account || '일반';
+      if (accountA !== accountB) return accountA.localeCompare(accountB, 'ko');
+      return a.name.localeCompare(b.name, 'ko');
+    });
+
+    // 계좌별 통계 미리 계산
+    const accountStats = {};
+    sorted.forEach(h => {
+      const acc = h.account || '일반';
+      if (!accountStats[acc]) accountStats[acc] = { count: 0, value: 0 };
+      accountStats[acc].count += 1;
+      accountStats[acc].value += (h.value || 0);
+    });
 
     let html = `
       <div class="holdings-header">
@@ -77,14 +93,27 @@ const UI = (() => {
       </div>
     `;
 
+    let currentAccount = null;
     sorted.forEach(h => {
+      const account = h.account || '일반';
+
+      // 계좌가 바뀌면 그룹 헤더 삽입
+      if (account !== currentAccount) {
+        currentAccount = account;
+        const stat = accountStats[account];
+        html += `
+          <div class="holdings-group-header">
+            <span class="group-name">📁 ${escapeHtml(account)}</span>
+            <span class="group-meta">${stat.count}종목 · ${fmtKRW(stat.value)}</span>
+          </div>
+        `;
+      }
+
       const retCls = pnlClass(h.returnRate);
-      // 계좌 정보를 종목명 아래에 표시
-      const accountLabel = h.account ? `<span class="account-badge">${escapeHtml(h.account)}</span>` : '';
       html += `
         <div class="holdings-row">
           <div class="name">
-            ${escapeHtml(h.name)} ${accountLabel}
+            ${escapeHtml(h.name)}
             <span class="ticker">${escapeHtml(String(h.ticker))} · ${escapeHtml(h.sector || '')}</span>
           </div>
           <div class="value">
@@ -140,7 +169,7 @@ const UI = (() => {
     modeEl.value = mode;
     whoEl.value  = who;
     titleEl.textContent = (mode === 'edit' ? '종목 수정' : '종목 추가') +
-                          (who === 'wife' ? ' · 아내' : ' · 남편');
+                          (who === 'wife' ? ' · Em 🐰' : ' · Fabio 🦊');
 
     if (mode === 'edit' && holding) {
       nameEl.value    = holding.name;
@@ -151,7 +180,6 @@ const UI = (() => {
       avgEl.value     = holding.avg;
       sectorEl.value  = holding.sector || '기타';
       memoEl.value    = holding.memo || '';
-      // 수정 모드에선 매칭 키(종목명+계좌) 잠금
       nameEl.readOnly = true;
       accountEl.readOnly = true;
       tickerEl.readOnly = true;
